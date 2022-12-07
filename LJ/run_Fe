@@ -1,0 +1,60 @@
+#   lmp -in run_Fe
+# ------------- Initialisation
+
+pair_style lj/cut 5.798
+units        metal
+boundary     p p p
+atom_style   atomic
+dimension 3
+# ------------- System definition
+read_data	NPT.Fe.startpoint.2669.lammps
+#read_data	NPT.Fe.startpoint.1335.lammps
+#read_data	NPT.Fe.startpoint.667.lammps
+
+# ------------- settings
+#mass 1 55.84
+pair_coeff * * 0.4007 2.3193
+
+
+# Fixes:
+timestep .001 # ----------------------------------------------------------------------------------------------------if real femtoseconds
+variable Tsim equal 3500 #------------- --------------------------------------------------------------------------- creating Temp vairaible Kelvin
+variable Psim equal 1.234e+6 #--------------------------------------------------------------------------------------creating pressure variable about 1 atomsopher
+#log log.${Tsim}K.1atomsophere.lammps #-----------------------------------------------------------------------------Close current log file and open new lg file with this title
+velocity all create ${Tsim} 12345 #-------------------------------------------------------------------------------- velocity all for some temp 
+fix NPT all npt temp ${Tsim} ${Tsim} $(100.0*dt) iso ${Psim} ${Psim} $(1000.0*dt) #-------------------------------- fix ID group style(npt) args(temp values = Tstart Tstop Tdamp ) (iso Pstart Pstop Pdamp)
+
+thermo 100 # --------------------------------------------------------------------------------------------------------output thermodynamics every N timesteps
+thermo_style custom step temp press vol density pe ke etotal enthalpy #----------------------------------------------thermo_style arg[custom(step=timestep, temp=temperature,press=pressure,vol=volume,]
+run 2000000
+
+#---------------------------------------------------------
+unfix NPT
+#---------------------------------------------------------
+# Saving Data:
+# write_data	NPT.Fe.01.lammps
+
+
+# Fixes:
+dump            1 all custom 100 traj_npt_nve.lammpstrj id type xu yu zu
+dump_modify     1 sort id
+#timestep .001 # -----------------------------------------------------------------------------------------------------if real femtoseconds
+#variable Tsim equal 1911 #------------------------------------------------------------------------------------------ creating Temp vairaible Kelvin
+#variable Psim equal 1 #----------------------------------------------------------------------------------------------creating pressure variable about 1 atomsopher
+#log log.nve.lammps #-------------------------------------------------------------------------------------------------Close current log file and open new lg file with this title
+#velocity all create ${Tsim} 12345 #--------------------------------------------------------------------------------- velocity all for some temp 
+#fix NPT all npt temp ${Tsim} ${Tsim} $(100.0*dt) iso ${Psim} ${Psim} $(1000.0*dt) #--------------------------------- fix ID group style(npt) args(temp values = Tstart Tstop Tdamp ) (iso Pstart Pstop Pdamp)
+fix NVE all nve
+thermo 100 # ---------------------------------------------------------------------------------------------------------output thermodynamics every N timesteps
+thermo_style custom step temp press vol density pe ke etotal enthalpy #-----------------------------------------------thermo_style arg[custom(step=timestep, temp=temperature,press=pressure,vol=volume,]
+run 1000000
+
+
+#---------------------------------------------------------
+# Saving Data:
+write_data	NVE.Fe.01.lammps
+
+
+
+
+
